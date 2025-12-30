@@ -1,0 +1,7 @@
+{
+  "name": "DAiW - Digital AI Workstation",
+  "description": "A musical intention engine and prompt-writing tool for generative music platforms. Sculpt intent, arrange sections, and compile structured prompts.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DAiW - Digital AI Workstation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              background: "#1a1022",
+              surface: "#151118",
+              "surface-light": "#322839",
+              border: "#493b54",
+              primary: "#9213ec",
+              "primary-hover": "#aa3af0",
+              secondary: "#2a2130",
+              text: "#ffffff",
+              "text-muted": "#ad9db9",
+              accent: "#00d2ff"
+            },
+            fontFamily: {
+              sans: ['Space Grotesk', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        background-color: #1a1022;
+        color: #ffffff;
+        font-family: 'Space Grotesk', sans-serif;
+      }
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #151118;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #322839;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #493b54;
+      }
+      .tube-gradient {
+        background: linear-gradient(90deg, rgba(146,19,236,0) 0%, rgba(146,19,236,0.5) 50%, rgba(146,19,236,0) 100%);
+        background-size: 200% 100%;
+        animation: flow 3s infinite linear;
+      }
+      @keyframes flow {
+        0% { background-position: 100% 0; }
+        100% { background-position: -100% 0; }
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "recharts": "https://esm.sh/recharts@^3.6.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
