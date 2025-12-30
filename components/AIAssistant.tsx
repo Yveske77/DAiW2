@@ -1,14 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Mic, Send, Image as ImageIcon, Sparkles, Loader2, Music } from 'lucide-react';
-import { ChatMessage, ImageSize } from '../types';
+import { ChatMessage, ImageSize, NodeBlock } from '../types';
 import * as geminiService from '../services/geminiService';
 
 interface AIAssistantProps {
   onClose: () => void;
   isOpen: boolean;
+  nodes: NodeBlock[];
 }
 
-export const AIAssistant: React.FC<AIAssistantProps> = ({ onClose, isOpen }) => {
+export const AIAssistant: React.FC<AIAssistantProps> = ({ onClose, isOpen, nodes }) => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([
     { id: '1', role: 'model', text: 'I\'m your DAiW Creative Assistant. I can help generate prompts, analyze your arrangement, or create cover art.', timestamp: Date.now() }
@@ -56,6 +57,21 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onClose, isOpen }) => 
        } else {
            responseText = "I couldn't generate the image at this time.";
        }
+    } else if (lowerInput.includes('lyric') || lowerInput.includes('write a song')) {
+       // Extract context from nodes
+       const genreNode = nodes.find(n => n.type === 'genre');
+       const detectedGenre = genreNode?.data?.genres?.[0] || 'Pop';
+       
+       const lyricNode = nodes.find(n => n.type === 'lyrics');
+       // If input is short (generic command), try to use node data, otherwise use input as topic
+       const topic = (lowerInput.length < 30 && lyricNode?.data?.topic) 
+           ? lyricNode.data.topic 
+           : userMsg.text;
+       
+       const mood = lyricNode?.data?.mood || 'Creative';
+
+       responseText = await geminiService.generateLyrics(topic, detectedGenre, mood);
+
     } else if (lowerInput.includes('analyze') || lowerInput.includes('review')) {
        responseText = await geminiService.generateAnalysis(userMsg.text);
     } else {

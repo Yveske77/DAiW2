@@ -202,7 +202,7 @@ const App = () => {
               <SequencerTimeline curves={[]} />
            )}
            
-           <AIAssistant isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} />
+           <AIAssistant isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} nodes={nodes} />
         </main>
 
         {/* Right Sidebar (Inspector) */}
@@ -281,4 +281,37 @@ const App = () => {
                        <div className="space-y-4 p-3 bg-surface-light rounded-lg border border-border">
                           <div className="flex justify-between items-center">
                              <span className="text-xs text-white">Density</span>
-                             <span className="text-[10px] text-primary">High
+                             <span className="text-[10px] text-primary">High</span>
+                          </div>
+                          <input type="range" className="w-full h-1 bg-background rounded-lg appearance-none cursor-pointer accent-primary" />
+                          
+                          <div className="flex justify-between items-center">
+                             <span className="text-xs text-white">Complexity</span>
+                             <span className="text-[10px] text-primary">Med</span>
+                          </div>
+                          <input type="range" className="w-full h-1 bg-background rounded-lg appearance-none cursor-pointer accent-primary" />
+                       </div>
+                   )}
+                   
+                   <div className="mt-auto pt-4 border-t border-border">
+                      <button 
+                        onClick={() => removeNode(selectedNode.id)}
+                        className="w-full py-2 bg-red-900/20 text-red-400 border border-red-900/50 rounded text-xs font-bold hover:bg-red-900/40 transition-colors flex items-center justify-center gap-2"
+                      >
+                         <Trash2 size={12} /> DELETE NODE
+                      </button>
+                   </div>
+                </div>
+             ) : (
+                <div className="flex-1 flex items-center justify-center text-text-muted text-xs p-8 text-center opacity-50">
+                   Select a node to view properties
+                </div>
+             )}
+          </aside>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default App;
