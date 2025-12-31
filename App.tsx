@@ -40,7 +40,8 @@ const App = () => {
   const [projectMeta, setProjectMeta] = useState({
     name: 'Neon Horizons',
     bpm: 128,
-    key: 'C Minor'
+    key: 'C Minor',
+    genre: 'Electronic'
   });
 
   const addNode = (type: NodeBlock['type'] = 'instrument') => {
@@ -76,17 +77,21 @@ const App = () => {
 
     setIsGeneratingLyrics(true);
     
-    // Attempt to find genre from other nodes if not specified
+    // Attempt to find genre from other nodes if not specified, otherwise use project meta
     const genreNode = nodes.find(n => n.type === 'genre');
-    const detectedGenre = genreNode?.data?.genres?.[0] || 'Pop';
+    const detectedGenre = genreNode?.data?.genres?.[0] || projectMeta.genre || 'Pop';
     
     const topic = node.data.topic || 'Love and Loss';
     const mood = node.data.mood || 'Melancholic';
     
-    const lyrics = await geminiService.generateLyrics(topic, detectedGenre, mood);
-    
-    updateNodeData(selectedNodeId, { lyrics });
-    setIsGeneratingLyrics(false);
+    try {
+        const lyrics = await geminiService.generateLyrics(topic, detectedGenre, mood);
+        updateNodeData(selectedNodeId, { lyrics });
+    } catch (e) {
+        console.error("Failed to generate lyrics", e);
+    } finally {
+        setIsGeneratingLyrics(false);
+    }
   };
 
   const selectedNode = nodes.find(n => n.id === selectedNodeId);
