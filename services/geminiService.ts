@@ -4,15 +4,17 @@ const apiKey = process.env.API_KEY || ''; // In a real app, handle missing key g
 const ai = new GoogleGenAI({ apiKey });
 
 export const generateCreativeSuggestion = async (
-  context: string,
+  prompt: string,
+  systemInstruction?: string,
   modelName: string = 'gemini-3-pro-preview'
 ): Promise<string> => {
   try {
     const response = await ai.models.generateContent({
       model: modelName,
-      contents: context,
+      contents: prompt,
       config: {
         thinkingConfig: { thinkingBudget: 1024 }, // Enable thinking for deeper musical reasoning
+        systemInstruction: systemInstruction,
       }
     });
     return response.text || "No suggestion generated.";
@@ -23,11 +25,12 @@ export const generateCreativeSuggestion = async (
 };
 
 export const generateAnalysis = async (
-  context: string,
+  prompt: string,
+  systemInstruction?: string,
   imageBase64?: string
 ): Promise<string> => {
   try {
-    const parts: any[] = [{ text: context }];
+    const parts: any[] = [{ text: prompt }];
     if (imageBase64) {
       parts.push({
         inlineData: {
@@ -42,6 +45,7 @@ export const generateAnalysis = async (
       contents: { parts },
       config: {
         thinkingConfig: { thinkingBudget: 2048 },
+        systemInstruction: systemInstruction,
       }
     });
     return response.text || "Analysis complete.";

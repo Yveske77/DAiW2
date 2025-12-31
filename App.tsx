@@ -35,6 +35,13 @@ const App = () => {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isAiOpen, setIsAiOpen] = useState(true);
   const [isGeneratingLyrics, setIsGeneratingLyrics] = useState(false);
+  
+  // Project Metadata State
+  const [projectMeta, setProjectMeta] = useState({
+    name: 'Neon Horizons',
+    bpm: 128,
+    key: 'C Minor'
+  });
 
   const addNode = (type: NodeBlock['type'] = 'instrument') => {
     const newNode: NodeBlock = {
@@ -94,7 +101,7 @@ const App = () => {
           </div>
           <div>
             <h1 className="text-lg font-bold leading-tight">DAiW Workstation</h1>
-            <p className="text-text-muted text-xs">Tune-Forge-1 • Project: Neon Horizons</p>
+            <p className="text-text-muted text-xs">Tune-Forge-1 • Project: {projectMeta.name}</p>
           </div>
         </div>
 
@@ -202,7 +209,13 @@ const App = () => {
               <SequencerTimeline curves={[]} />
            )}
            
-           <AIAssistant isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} nodes={nodes} />
+           <AIAssistant 
+             isOpen={isAiOpen} 
+             onClose={() => setIsAiOpen(false)} 
+             nodes={nodes}
+             selectedNodeId={selectedNodeId}
+             projectMeta={projectMeta}
+           />
         </main>
 
         {/* Right Sidebar (Inspector) */}

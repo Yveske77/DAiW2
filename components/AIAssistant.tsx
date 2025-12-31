@@ -7,9 +7,11 @@ interface AIAssistantProps {
   onClose: () => void;
   isOpen: boolean;
   nodes: NodeBlock[];
+  selectedNodeId: string | null;
+  projectMeta: { name: string; bpm: number; key: string };
 }
 
-export const AIAssistant: React.FC<AIAssistantProps> = ({ onClose, isOpen, nodes }) => {
+export const AIAssistant: React.FC<AIAssistantProps> = ({ onClose, isOpen, nodes, selectedNodeId, projectMeta }) => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([
     { id: '1', role: 'model', text: 'I\'m your DAiW Creative Assistant. I can help generate prompts, analyze your arrangement, or create cover art.', timestamp: Date.now() }
@@ -41,6 +43,53 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onClose, isOpen, nodes
     let responseText = '';
     const lowerInput = userMsg.text.toLowerCase();
 
+    // Construct refined context for System Instruction
+    const projectStructure = nodes.map(n => {
+        const isSelected = n.id === selectedNodeId;
+        const selectedMarker = isSelected ? " <<< CURRENTLY FOCUSED >>>" : "";
+        
+        let details = "";
+        // Intelligent summarization of node data
+        if (n.type === 'lyrics' && n.data.lyrics) {
+             details = `Topic: ${n.data.topic || 'N/A'}, Mood: ${n.data.mood || 'N/A'}\n  Lyrics Preview: "${n.data.lyrics.substring(0, 100).replace(/\n/g, ' ')}..."`;
+        } else if (n.type === 'context' && n.data.prompt) {
+             details = `Prompt: "${n.data.prompt}"`;
+        } else if (n.type === 'genre' && n.data.genres) {
+             details = `Genres: ${n.data.genres.join(', ')}`;
+        } else if (n.type === 'instrument' && n.data.instruments) {
+             details = `Instruments: ${n.data.instruments.join(', ')}`;
+        } else if (n.type === 'effect' && n.data.effects) {
+             details = `Effects: ${n.data.effects.join(', ')}`;
+        } else {
+             details = JSON.stringify(n.data);
+        }
+        
+        return `- [${n.type.toUpperCase()}] ${n.name}${selectedMarker}\n  ${details}`;
+    }).join('\n');
+
+    const selectedNode = nodes.find(n => n.id === selectedNodeId);
+    let focusNote = "";
+    if (selectedNode) {
+        focusNote = `User is currently selecting the node: "${selectedNode.name}" of type '${selectedNode.type}'. Focus on helping with this specific component if the user asks.`;
+    }
+
+    const systemInstruction = `
+You are the Creative Assistant for DAiW (Digital AI Workstation).
+Your goal is to assist the user in creating music, writing prompts, and structuring songs.
+
+PROJECT METADATA:
+Name: ${projectMeta.name}
+BPM: ${projectMeta.bpm}
+Key: ${projectMeta.key}
+
+CURRENT PROJECT STRUCTURE (Nodes):
+${projectStructure}
+
+${focusNote}
+
+Provide concise, creative, and musically relevant responses. If generating prompts, adhere to the project's genre and mood.
+`;
+
     if (lowerInput.includes('cover art') || lowerInput.includes('generate image')) {
        const imageUrl = await geminiService.generateCoverArt(userMsg.text, imageSize);
        if (imageUrl) {
@@ -62,7 +111,9 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onClose, isOpen, nodes
        const genreNode = nodes.find(n => n.type === 'genre');
        const detectedGenre = genreNode?.data?.genres?.[0] || 'Pop';
        
-       const lyricNode = nodes.find(n => n.type === 'lyrics');
+       const selectedNode = nodes.find(n => n.id === selectedNodeId);
+       const lyricNode = (selectedNode?.type === 'lyrics' ? selectedNode : nodes.find(n => n.type === 'lyrics'));
+       
        // If input is short (generic command), try to use node data, otherwise use input as topic
        const topic = (lowerInput.length < 30 && lyricNode?.data?.topic) 
            ? lyricNode.data.topic 
@@ -73,9 +124,9 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ onClose, isOpen, nodes
        responseText = await geminiService.generateLyrics(topic, detectedGenre, mood);
 
     } else if (lowerInput.includes('analyze') || lowerInput.includes('review')) {
-       responseText = await geminiService.generateAnalysis(userMsg.text);
+       responseText = await geminiService.generateAnalysis(userMsg.text, systemInstruction);
     } else {
-       responseText = await geminiService.generateCreativeSuggestion(userMsg.text);
+       responseText = await geminiService.generateCreativeSuggestion(userMsg.text, systemInstruction);
     }
 
     const modelMsg: ChatMessage = { id: (Date.now() + 1).toString(), role: 'model', text: responseText, timestamp: Date.now() };
